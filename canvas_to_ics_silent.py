@@ -74,7 +74,7 @@ for a, course in all_assignments:
         event.add('dtstart', due_dt)
         event.add('dtend', due_dt + datetime.timedelta(hours=1))
     # YOU MUST CHANGE THE URL BELOW FOR THE CODE TO WORK
-    event.add('uid', f"{a.get('id')}_{course.get('id')}@canvas.ou.edu")
+    event.add('uid', f"{a.get('id')}_{course.get('id')}@canvas.mit.edu")
     cal.add_component(event)
 
 # ===== Export ICS =====
