@@ -1,0 +1,16 @@
+## YOU MUST CHANGE THE FIELDS FOR TOKEN, URL, and MACOS USER IN ORDER FOR THE AUTOMATOR WRAPPER TO WORK CORRECTLY
+
+#!/bin/bash
+
+# Debug
+echo "Running script..." >&2
+echo "Using Python at: /Library/Frameworks/Python.framework/Versions/3.13/bin/python3" >&2
+
+# Set Canvas environment variables (Automator doesn't inherit them)
+export CANVAS_TOKEN="YOUR_TOKEN"
+export CANVAS_BASE_URL="YOUR_INSTITUTION'S_URL"
+
+# Run the script
+/Library/Frameworks/Python.framework/Versions/3.13/bin/python3 /Users/USER/Desktop/canvas_to_ics_silent.py --all-day --future-only 2>&1
+
+open /Users/USER/Desktop/Canvas_Exports/CanvasEventExport.ics
