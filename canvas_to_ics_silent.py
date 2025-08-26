@@ -25,18 +25,37 @@ headers = {"Authorization": f"Bearer {TOKEN}"}
 
 # ===== Helpers =====
 def get_courses():
-    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active"
-    resp = requests.get(url, headers=headers)
-    if resp.status_code != 200:
-        return []
-    return resp.json()
+    """Fetch all active courses with pagination support"""
+    courses = []
+    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&per_page=100"
+    while url:
+        resp = requests.get(url, headers=headers)
+        if resp.status_code != 200:
+            break
+        courses.extend(resp.json())
+        url = resp.links.get("next", {}).get("url")  # follow pagination
+    return courses
 
 def get_assignments(course_id):
-    url = f"{BASE_URL}/api/v1/courses/{course_id}/assignments"
+    """Fetch all assignments for a course with pagination support"""
+    assignments = []
+    url = f"{BASE_URL}/api/v1/courses/{course_id}/assignments?per_page=100"
+    while url:
+        resp = requests.get(url, headers=headers)
+        if resp.status_code != 200:
+            break
+        assignments.extend(resp.json())
+        url = resp.links.get("next", {}).get("url")  # follow pagination
+    return assignments
+
+def get_quiz_due(course_id, quiz_id):
+    """Fetch due date for quizzes when assignment-level due_at is missing"""
+    url = f"{BASE_URL}/api/v1/courses/{course_id}/quizzes/{quiz_id}"
     resp = requests.get(url, headers=headers)
     if resp.status_code != 200:
-        return []
-    return resp.json()
+        return None
+    quiz = resp.json()
+    return quiz.get("due_at")
 
 # ===== Fetch all assignments =====
 all_assignments = []
@@ -58,9 +77,16 @@ now = datetime.datetime.now().astimezone()
 for a, course in all_assignments:
     title = f"{a.get('name', 'Canvas Assignment')} [{course.get('course_code', course.get('name',''))}]"
     due = a.get("due_at")
+
+    # === Patch: check if it's a quiz with no assignment-level due date ===
+    if not due and a.get("quiz_id"):
+        due = get_quiz_due(course["id"], a["quiz_id"])
+
     if not due:
-        continue
+        continue  # still nothing, skip
+
     due_dt = datetime.datetime.fromisoformat(due.replace("Z","+00:00")).astimezone()
+
     if future_only and due_dt < now:
         continue
 
@@ -73,7 +99,7 @@ for a, course in all_assignments:
     else:
         event.add('dtstart', due_dt)
         event.add('dtend', due_dt + datetime.timedelta(hours=1))
-    # YOU MUST CHANGE THE URL BELOW FOR THE CODE TO WORK
+
     event.add('uid', f"{a.get('id')}_{course.get('id')}@canvas.mit.edu")
     cal.add_component(event)
 
