@@ -7,7 +7,7 @@ This tool is built to be used on Mac with iCal, and is not adapted specifically 
 
 ---
 
-**Step-by-Step Instructions:**
+## **Step-by-Step Instructions:**
 
 **Step 1:** **Install Python 3.9+**. You may find the download for MacOS [***here***](https://www.python.org/downloads/). No extra configuration needs to be done right off the bat.
 
@@ -19,6 +19,10 @@ This tool is built to be used on Mac with iCal, and is not adapted specifically 
 
     CANVAS_BASE_URL="https://canvas.mit.edu"
     CANVAS_TOKEN="YOUR_TOKEN_HERE"
+
+Also, you will have to do something similar with the `.py` file. Open it in a text editor, find line 77, and change the url to whatever your institution's url is **without the https://**.
+
+    event.add('uid', f"{a.get('id')}_{course.get('id')}@canvas.mit.edu")
 
 **Step 5:** Make the `.sh` file executable. In MacOS Terminal, paste and run:
 
